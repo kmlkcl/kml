@@ -1,0 +1,29 @@
+# Any message which is open by hashtag must be closed with hashtag which defines a comment #
+
+# Types must be very simple as how much they allocate with an underscore at the beginning #
+# An example type _8 (8bit)  _32 (32bit)
+
+# For each type there can be a type 'alias' which can explain how it'll be handled #
+# Example type_8=>byte
+
+# Here is a bunch of variable definitions #
+# type_8 a;             defined a variable called a and its 8 bits #
+# type_32=>int b;       defined a variable called b, which is 32 bits and its alias is int #
+
+# Declaring a function #
+# int <= function[FunctionName] <= (int a, type_8 b);
+# !function[FunctionName]<=int;
+
+# Fibonacci Example #
+int <= function[Fibonacci] <= int x;
+
+int <= function[Fibonacci] <= int x {
+    if(x < 3){
+        <= x;
+    }else{
+        <= x * [Fibonacci] <= x-1;
+    }
+}
+
+[Fibonacci] <= 20;
+
