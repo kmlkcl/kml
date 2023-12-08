@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+
+cmake-build-debug/
+pcre2-pcre2-10.42/
