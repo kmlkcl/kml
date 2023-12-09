@@ -24,18 +24,13 @@ bool isAlpha(int charValue) {
 }
 
 bool isDigit(int charValue) { return (charValue >= char_0 && charValue <= char_9); }
-/*
- * EOF_TOKEN = -1,
-    DECIMAL = -2,
-    TYPE = -3,
-    IDENTIFIER = -6,
-    FUNCTION = -7
- */
-SMLKR_LinkedList *Tokenize(char *charStream) {
+
+LinkedList Tokenize(char *charStream) {
     if (charStream == NULL) {
         return  NULL;
     }
 
+    LinkedList userTypes = SMLKR_LinkedList_Init();
     LinkedList l = SMLKR_LinkedList_Init();
 
     char *currentPosition = charStream;
@@ -76,8 +71,9 @@ SMLKR_LinkedList *Tokenize(char *charStream) {
             currentPosition = currentPosition + 1;
             continue;
         } else {
-            token->value = (char *) malloc(sizeof(char));
-            *token->value = *currentPosition;
+            token->value = (char *) malloc(sizeof(char)+1);
+            token->value[0] = currentPosition[0];
+            token->value[1] = '\0';
             currentPosition = currentPosition+1;
         }
 

@@ -20,7 +20,7 @@ bit_32=>int;
 int <= function[Fibonacci] <= int x;
 
 int <= function[Fibonacci] <= int x {
-    if(x < 3){
+    if(x < 21543){
         <= x;
     }else{
         <= x * [Fibonacci] <= x-1;

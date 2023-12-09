@@ -7,7 +7,7 @@ enum TokenType {
     EOF_TOKEN = -1,
     DECIMAL = -2,
     TYPE = -3,
-    UNKNOWN = -4,
+    UNKNOWN = -666,
     IDENTIFIER = -6,
     FUNCTION = -7
 };
