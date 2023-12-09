@@ -16,10 +16,12 @@ typedef SMLKR_Node_Linked Node;
 typedef int (*Rule)(LinkedList *tokenList);
 
 #define RULE_TypeAlias 1
-
 int Rule_TypeAlias(LinkedList *tokenList);
 
 bool EvaluateRules(LinkedList *ruleSet, LinkedList *tokens);
+
+#define LinkedListGet(linkedList, type, index) (type*)(SMLKR_LinkedList_Get(linkedList,index)->Node)
+
 
 bool Parser(LinkedList *tokens) {
 
@@ -31,16 +33,21 @@ bool Parser(LinkedList *tokens) {
     LinkedList *tokenPool = SMLKR_LinkedList_Init();
 
     while (current->Next != NULL) {
+
         Token *token = (Token *) current->Node;
         SMLKR_LinkedList_AddNode_Tail(tokenPool, token);
+        current = current->Next;
 
-        if (token->type == TokenType::TYPE) {
-            Rule typeAliasExpressionRule = Rule_TypeAlias;
-            SMLKR_LinkedList_AddNode_Tail(ruleSet, &typeAliasExpressionRule);
+        Rule foundRule = NULL;
+        switch (token->type) {
+            case TokenType::TYPE: foundRule = Rule_TypeAlias; break;
         }
 
+        if(foundRule == NULL)
+            continue;
+
+        SMLKR_LinkedList_AddNode_Tail(ruleSet, &foundRule);
         EvaluateRules(ruleSet, tokenPool);
-        current = current->Next;
     }
     return true;
 }
@@ -50,7 +57,7 @@ bool EvaluateRules(LinkedList *ruleSet, LinkedList *tokens) {
     int foundRule = 0;
 
     for (int i = 0; i < ruleSet->Size; i++) {
-        Rule rule = *(Rule *) (SMLKR_LinkedList_Get(ruleSet, i)->Node);
+        Rule rule = *LinkedListGet(ruleSet,Rule,i);
 
         int ruleResult = rule(tokens);
 
@@ -76,10 +83,8 @@ bool EvaluateRules(LinkedList *ruleSet, LinkedList *tokens) {
         case RULE_TypeAlias:
             AST_Type_Real *realType = (AST_Type_Real *) malloc(sizeof(AST_Type_Real));
             AST_Expression_Alias *e = (AST_Expression_Alias *) malloc(sizeof(AST_Expression_Alias));
-
-
-            Token *token = (Token *) (SMLKR_LinkedList_Get(tokens, 2)->Node);
-            realType->size = (unsigned char)*token->value;
+            Token *token = LinkedListGet(tokens,Token,2);
+            realType->size = (unsigned char) *token->value;
             realType->bitToken = int(TokenType::TYPE);
 
             break;
@@ -93,7 +98,6 @@ bool EvaluateRules(LinkedList *ruleSet, LinkedList *tokens) {
 int Rule_TypeAlias(LinkedList *tokenList) {
     Node *current = tokenList->Head;
 
-
     for (int i = 0; i < tokenList->Size; i++) {
         Token *t = (Token *) current->Node;
 
@@ -103,11 +107,9 @@ int Rule_TypeAlias(LinkedList *tokenList) {
                 (i == 2 && t->type != TokenType::NUMERIC) ||
                 (i == 3 && strcmp(&*t->value, "=") != 0) ||
                 (i == 4 && strcmp(&*t->value, ">") != 0) ||
-                (i == 5 && t->type != TokenType::IDENTIFIER))
-        {
+                (i == 5 && t->type != TokenType::IDENTIFIER)) {
             return -1;
-        }
-        else if (i == 6) {
+        } else if (i == 6) {
             if (strcmp(&*t->value, ";") == 0) {
                 return RULE_TypeAlias;
             } else {
