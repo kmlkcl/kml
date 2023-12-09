@@ -1,6 +1,7 @@
 #include <cstdio>
 #include "smlkr_io.h"
 #include "lexer/kml_lexer.h"
+#include "ast/ast.h"
 
 int main(){
 
@@ -9,11 +10,13 @@ int main(){
 
     SMLKR_Node_Linked* Current = list->Head;
 
+    Parser(list);
+    /*
     while(Current!=NULL){
         Token* t = (Token*)Current->Node;
-        printf("Token Value: %s \n",(char*)t->value);
+        printf("Token Value: %s \n",t->value);
         Current = Current->Next;
-    }
+    }*/
 
     return 0;
 }
