@@ -63,7 +63,7 @@ LinkedList Tokenize(char *charStream) {
             currentPosition =  nextPosition;
         } else if (isDigit(charValue)) {
             nextPosition = Regex("[0-9]+", currentPosition, &token->value);
-            token->type = TokenType::DECIMAL;
+            token->type = TokenType::NUMERIC;
             currentPosition = nextPosition;
         } else if (*currentPosition == ' ' || *currentPosition=='\n' ) {
             free(token->value);

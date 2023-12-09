@@ -24,6 +24,7 @@ add_executable(kml
         data_structures/smlkr_linked_list.cpp
         data_structures/smlkr_node.cpp
         kml/ast/ast.h
+        kml/ast/ast.cpp
 )
 
 target_link_libraries(kml PRIVATE ${PCRE2_LIBRARY})
