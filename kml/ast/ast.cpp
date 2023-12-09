@@ -1,7 +1,3 @@
-//
-// Created by kemal on 09.12.2023.
-//
-
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -19,8 +15,9 @@ typedef SMLKR_Node_Linked Node;
  */
 typedef int (*Rule)(LinkedList *tokenList);
 
+#define RULE_TypeAlias 1
 
-int TypeAliasRule(LinkedList *tokenList);
+int Rule_TypeAlias(LinkedList *tokenList);
 
 bool EvaluateRules(LinkedList *ruleSet, LinkedList *tokens);
 
@@ -37,14 +34,12 @@ bool Parser(LinkedList *tokens) {
         Token *token = (Token *) current->Node;
         SMLKR_LinkedList_AddNode_Tail(tokenPool, token);
 
-        Rule r = TypeAliasRule;
-
         if (token->type == TokenType::TYPE) {
-            SMLKR_LinkedList_AddNode_Tail(ruleSet, &r);
+            Rule typeAliasExpressionRule = Rule_TypeAlias;
+            SMLKR_LinkedList_AddNode_Tail(ruleSet, &typeAliasExpressionRule);
         }
 
         EvaluateRules(ruleSet, tokenPool);
-
         current = current->Next;
     }
     return true;
@@ -52,11 +47,10 @@ bool Parser(LinkedList *tokens) {
 
 bool EvaluateRules(LinkedList *ruleSet, LinkedList *tokens) {
 
-    int appliableRule = 0;
+    int foundRule = 0;
 
     for (int i = 0; i < ruleSet->Size; i++) {
-        Node *n = SMLKR_LinkedList_Get(ruleSet, i);
-        Rule rule = *(Rule *) n->Node;
+        Rule rule = *(Rule *) (SMLKR_LinkedList_Get(ruleSet, i)->Node);
 
         int ruleResult = rule(tokens);
 
@@ -67,24 +61,27 @@ bool EvaluateRules(LinkedList *ruleSet, LinkedList *tokens) {
         }
 
         if (ruleResult > 0) {
-            if (appliableRule != 0) {
+            if (foundRule != 0) {
                 printf("Ambiguity! More than one rule is appliable.");
                 return false;
             } else {
-                appliableRule = ruleResult;
+                foundRule = ruleResult;
             }
         }
     }
 
-    switch (appliableRule) {
+    switch (foundRule) {
         case 0:
             break;
-        case 1: //Alias Expression Rule
+        case RULE_TypeAlias:
             AST_Type_Real *realType = (AST_Type_Real *) malloc(sizeof(AST_Type_Real));
             AST_Expression_Alias *e = (AST_Expression_Alias *) malloc(sizeof(AST_Expression_Alias));
-            Token *token = (Token *) SMLKR_LinkedList_Get(tokens, 2);
-            realType->size = *token->value;
-            realType->bitToken = 1213;
+
+
+            Token *token = (Token *) (SMLKR_LinkedList_Get(tokens, 2)->Node);
+            realType->size = (unsigned char)*token->value;
+            realType->bitToken = int(TokenType::TYPE);
+
             break;
     }
 
@@ -93,65 +90,29 @@ bool EvaluateRules(LinkedList *ruleSet, LinkedList *tokens) {
     return true;
 }
 
-int TypeAliasRule(LinkedList *tokenList) {
+int Rule_TypeAlias(LinkedList *tokenList) {
     Node *current = tokenList->Head;
 
 
     for (int i = 0; i < tokenList->Size; i++) {
         Token *t = (Token *) current->Node;
 
-        switch (i) {
-            case 0: {
-                if (t->type != TokenType::TYPE) {
-                    return -1;
-                }
+        if (
+                (i == 0 && t->type != TokenType::TYPE) ||
+                (i == 1 && strcmp(&*t->value, "_") != 0) ||
+                (i == 2 && t->type != TokenType::NUMERIC) ||
+                (i == 3 && strcmp(&*t->value, "=") != 0) ||
+                (i == 4 && strcmp(&*t->value, ">") != 0) ||
+                (i == 5 && t->type != TokenType::IDENTIFIER))
+        {
+            return -1;
+        }
+        else if (i == 6) {
+            if (strcmp(&*t->value, ";") == 0) {
+                return RULE_TypeAlias;
+            } else {
+                return -1;
             }
-                break;
-
-            case 1: {
-                if (strcmp(&*t->value,"_")!=0) {
-                    return -1;
-                }
-            }
-                break;
-
-            case 2: {
-                if (t->type != TokenType::NUMERIC) {
-                    return -1;
-                }
-            }
-                break;
-
-            case 3: {
-                if (strcmp(&*t->value,"=")!=0) {
-                    return -1;
-                }
-            }
-                break;
-
-            case 4 : {
-                if (strcmp(&*t->value,">")!=0) {
-                    return -1;
-                }
-            }
-                break;
-
-            case 5: {
-                if (t->type != TokenType::IDENTIFIER) {
-                    return -1;
-                }
-            }
-                break;
-
-            case 6: {
-                if (*t->value != ';')  {
-                    return -1;
-                } else {
-                    return 1;
-                }
-            }
-                break;
-
         }
 
         current = current->Next;
